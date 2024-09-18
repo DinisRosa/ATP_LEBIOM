@@ -6,5 +6,5 @@
 ## RESUMO
 O TPC1 consistiu na realização de dois exercicios usando o "BLOCKLY"
 
-* um labirinto: 'BLOCKLY Maze.png'
+* resolver um labirinto: 'BLOCKLY Maze.png'
 * desenhar uma casa: 'BLOCKLY Turtle.png'
