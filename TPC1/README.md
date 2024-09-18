@@ -4,7 +4,7 @@
 ## AUTOR: Dinis Soveral Botelho Rosa (DSBR)
 
 ## RESUMO
-O TPC1 consistiu na realização de dois exercicios usando o "BLOCKLY"
+O TPC1 consistiu na realização de dois exercicios usando o programa visual "BLOCKLY"
 
 * resolver um labirinto: 'BLOCKLY Maze.png'
 * desenhar uma casa: 'BLOCKLY Turtle.png'
