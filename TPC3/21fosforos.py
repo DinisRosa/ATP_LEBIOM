@@ -125,6 +125,7 @@ while modo_de_jogo != 'c':
         modo_de_jogo = input('Que é que deseja fazer?')
     elif modo_de_jogo == 'b':
         print('In development')
+        PcStart()
         menu()
         modo_de_jogo = input('Que é que deseja fazer?')
     else:
