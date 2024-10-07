@@ -53,16 +53,20 @@ def minList(list):
 
 def isMintoMax(list):
     isOrdered = True
-    for i in range(len(list)-1):
-        if list[i] >= list[i+1]:
+    i = 0
+    while isOrdered or i < len(list)-1:
+        if list[i] > list[i+1]:
             isOrdered = False
+        i += 1
     return print('SIM') if isOrdered else print('NÃO')
 
 def isMaxtoMin(list):
     isOrdered = True
-    for i in range(len(list)-1):
-        if list[i] <= list[i+1]:
+    i = 0
+    while isOrdered or i < len(list)-1:
+        if list[i] < list[i+1]:
             isOrdered = False
+        i += 1
     return print('SIM') if isOrdered else print('NÃO')
 
 def findElement(list, elem):
