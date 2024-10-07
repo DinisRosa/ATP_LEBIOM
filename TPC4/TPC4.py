@@ -94,12 +94,10 @@ while op != 0:
     if op == 1:
         internalList = randomList()
         print(f'A lista interna guardada é agora: {internalList}')
-        op = menu()
     #PELO OPERADOR
     elif op == 2:
         internalList = inputList()
         print(f'A lista interna guardada é agora: {internalList}')
-        op = menu()
     #SÓ SE PREOCEGUE PARA AS OUTRAS OPERAÇÕES SE A LISTA INTERNA TIVER SIDO CRIADA
     if (op != 1 or 2) and internalList == []:
         op = int(input('''Crie ou Leie primeiro uma lista antes de fazer outras operações:
@@ -111,27 +109,21 @@ while op != 0:
     #SOMA DOS VALORES DA LISTA
     elif op == 3:
         print(f'A soma de todos os valores da lista interna é {somaList(internalList)}')
-        op = menu()
     #MÉDIA DOS VALRES DA LISTA
     elif op == 4:
         print(f'A média da lista interna é {meanList(internalList)}')
-        op = menu()
     #MAIOR DA LISTA
     elif op == 5:
         print(f'O maior valor da lista interna é {maxList(internalList)}')
-        op = menu()
     #MENOR DA LISTA
     elif op == 6:
         print(f'O menos valores da lista interna é {minList(internalList)}')
-        op = menu()
     #LISTA ORDENADA POR ORDEM CRESCENTE
     elif op == 7:
         isMintoMax(internalList)
-        op = menu()
     #LISTA POR OREDEM DECRESCENTE
     elif op == 8:
         isMaxtoMin(internalList)
-        op = menu()
     #PROCURAR POR NÚMERO NA LISTA
     elif op == 9:
         elem = int(input('Que número quer ver se está na lista interna? '))
@@ -139,7 +131,6 @@ while op != 0:
         if idx != -1:
             print(f'O {n} está na lista no index {idx}')
         else: print(f'O {n} não está na lista')
-        op = menu()
-
+    op = menu()
 #END MESSAGE
 print('Obrigado, volte sempre!!')
