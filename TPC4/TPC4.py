@@ -9,8 +9,8 @@ def menu():
     (4) Média dos valores da lista
     (5) Maior da lista
     (6) Menor lista
-    (7) A lista está ordenada por oredem crescente?
-    (8) A lista está ordenada por oredem decrescente?
+    (7) A lista está ordenada por ordem crescente?
+    (8) A lista está ordenada por ordem decrescente?
     (9) Procurar por um elemento
     (0) Sair
 ''')
@@ -54,7 +54,7 @@ def minList(list):
 def isMintoMax(list):
     isOrdered = True
     i = 0
-    while isOrdered or i < len(list)-1:
+    while isOrdered and i < len(list)-1:
         if list[i] > list[i+1]:
             isOrdered = False
         i += 1
@@ -63,7 +63,7 @@ def isMintoMax(list):
 def isMaxtoMin(list):
     isOrdered = True
     i = 0
-    while isOrdered or i < len(list)-1:
+    while isOrdered and i < len(list)-1:
         if list[i] < list[i+1]:
             isOrdered = False
         i += 1
@@ -93,11 +93,9 @@ while op != 0:
     #PELO PC
     if op == 1:
         internalList = randomList()
-        print(f'A lista interna guardada é agora: {internalList}')
     #PELO OPERADOR
     elif op == 2:
         internalList = inputList()
-        print(f'A lista interna guardada é agora: {internalList}')
     #SÓ SE PREOCEGUE PARA AS OUTRAS OPERAÇÕES SE A LISTA INTERNA TIVER SIDO CRIADA
     if (op != 1 or 2) and internalList == []:
         op = int(input('''Crie ou Leie primeiro uma lista antes de fazer outras operações:
@@ -131,6 +129,7 @@ while op != 0:
         if idx != -1:
             print(f'O {n} está na lista no index {idx}')
         else: print(f'O {n} não está na lista')
+    print(f'A lista interna guardada é: {internalList}')
     op = menu()
 #END MESSAGE
 print('Obrigado, volte sempre!!')
