@@ -6,6 +6,7 @@
 
 Este trabalho teve o intuito de trabalhar com listas de ints
 Tivemos de criar várias funções de manipulação de listas de ints, tais como:
+
 (Estas são para a criação da lista interna)
 * inputList() e randomList() que criam listas, a primeira em que o operador dá um número maximo de valores e depois indica N ints para ser a lista interna, o outro pede na mesma o N mas é o pc que 'escolhe' os valores usando random.randint(0,100)
 
