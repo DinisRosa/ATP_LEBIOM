@@ -70,11 +70,13 @@ def isMaxtoMin(list):
     return print('SIM') if isOrdered else print('NÃO')
 
 def findElement(list, elem):
-    for idx, n in enumerate(list):
+    idx = -1
+    for i, n in enumerate(list):
         if n == elem:
-            return idx, n
+            idx = i
+            return idx
     else:
-        return -1, n
+        return idx
         
 
 
@@ -125,10 +127,10 @@ while op != 0:
     #PROCURAR POR NÚMERO NA LISTA
     elif op == 9:
         elem = int(input('Que número quer ver se está na lista interna? '))
-        idx, n = findElement(internalList, elem)
+        idx = findElement(internalList, elem)
         if idx != -1:
-            print(f'O {n} está na lista no index {idx}')
-        else: print(f'O {n} não está na lista')
+            print(f'O {elem} está na lista no index {idx}')
+        else: print(f'O {elem} não está na lista')
     print(f'A lista interna guardada é: {internalList}')
     op = menu()
 #END MESSAGE
