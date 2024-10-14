@@ -7,9 +7,10 @@ def menu():
 Bem vindo ao jogo dos 21 Fósforos!
 Neste jogo, tu e o computador, á vez, podem tirar 1, 2, 3 ou 4 fósforos.
 Se ficares com o último fósforo perdes!
-    a) Ser o primeiro a jogar
-    b) Ser o segundo a jogar
-    c) Sair
+    (1) Ser o primeiro a jogar
+    (2) Ser o segundo a jogar
+
+    (0) Sair
     ''')
 
 
@@ -32,19 +33,17 @@ def PlayerStart():
         total_fosforos -= player_turn
         print(f'\033[1;30mFicaram/Ficou {total_fosforos} fósforos.')
         total_fosforos -= (5 - player_turn) 
-        print(f'\033[0;35mO pc tirou {5 - player_turn} fósforos!\n\033[1;30mFicaram/Ficou {total_fosforos} fósforos.]')
+        print(f'\033[0;35mO pc tirou {5 - player_turn} fósforos!\n\033[1;30mFicaram/Ficou {total_fosforos} fósforos.')
     print('\033[1;33mO pc ganhou! Boa sorte para a próxima!]\033[0;30m]')
 
 
 # O pc começa:
 
-import random as rd
-
 def PcStart():
     total_fosforos = 21
-    pc_turn = rd.randint(1, 4)
+    pc_turn = random.randint(1, 4)
     total_fosforos -= pc_turn
-    print(f'\033[0;35m{pc_turn}\n\033[1;30mT = {total_fosforos}\033[m')
+    print(f'\033[0;35m{pc_turn}\n\033[1;30mFicaram {total_fosforos} fosforos \033[m')
 
 
     while total_fosforos > 1:
@@ -55,7 +54,7 @@ def PcStart():
             player_turn = int(input('\033[0;34mO teu turno, quantos fósforos queres tirar:\033[m '))
 
         total_fosforos -= player_turn
-        print(f'\033[1;30mT = {total_fosforos}\033[m')
+        print(f'\033[1;30mFicaram {total_fosforos} fosforos \033[m')
 
 
         if total_fosforos == 1:
@@ -63,15 +62,23 @@ def PcStart():
         else:
             #logica do PC
             if total_fosforos % 5 == 1:
-                pc_turn = rd.randint(1,4)
+                pc_turn = random.randint(1,4)
             else:
-                if total_fosforos < 5:
-                    pc_turn = total_fosforos - 1
+                if (total_fosforos + player_turn) % 5 == 1:
+                    pc_turn = 5 - player_turn
                 else:
-                    pc_turn = (total_fosforos % 5) - (player_turn)
-            
+                    if total_fosforos < 5:
+                        player_turn = total_fosforos - 1
+                    else:
+                        pc_turn_prev = pc_turn
+                        if pc_turn + player_turn < 5:
+                            pc_turn = 5 - (player_turn + pc_turn_prev)
+                        else:
+                            pc_turn = 10 - (pc_turn_prev + player_turn)
+
+                  
             total_fosforos -= pc_turn
-            print(f'\033[0;35m{pc_turn}\n\033[1;30mT = {total_fosforos}\033[m')
+            print(f'\033[0;35m{pc_turn}\n\033[1;30mFicaram {total_fosforos} fosforos \033[m')
 
             if total_fosforos == 1:
                 print('\033[1;33mO pc ganhou! Boa sorte para a próxima!\033[m')
@@ -79,17 +86,14 @@ def PcStart():
 #O JOGO:
 
 menu()
-modo_de_jogo = input('Que é que deseja fazer? ')
-while modo_de_jogo != 'c':
-    if modo_de_jogo == 'a':
+op = int(input('Que é que deseja fazer? '))
+while op != 0:
+    if op == 1:
         PlayerStart()
-        menu()
-        modo_de_jogo = input('Que é que deseja fazer? ')
-    elif modo_de_jogo == 'b':
+    elif op == 2:
         PcStart()
-        menu()
-        modo_de_jogo = input('Que é que deseja fazer? ')
     else:
         print('Opcão inválida Escolha uma opção válida, por favor!')
-        modo_de_jogo = input('Que é que deseja fazer? ')
+    menu()
+    op = int(input('Que é que deseja fazer? '))
 print('Obrigado! Volte sempre!')
