@@ -1,0 +1,20 @@
+The Godfather::50::-1
+Citizen Kane::130::-1
+Schindler's List::114::-1
+Casablanca::42::-1
+Pulp Fiction::27::-1
+The Shawshank Redemption::17::-1
+2001: A Space Odyssey::57::-1
+Gone with the Wind::89::-1
+The Dark Knight::99::-1
+Star Wars: Episode IV - A New Hope::46::-1
+The Godfather Part II::100::-1
+Fight Club::100::-1
+The Lord of the Rings: The Return of the King::75::-1
+Forrest Gump::50::-1
+Goodfellas::130::-1
+The Matrix::45::-1
+Inception::100::-1
+One Flew Over the Cuckoo’s Nest::50::-1
+Psycho::68::-1
+The Silence of the Lambs::90::-1
