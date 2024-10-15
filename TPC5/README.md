@@ -2,7 +2,7 @@
 ## Data: 2024/10/07
 ## Autor: DSBR
 
-## Resumo
+## Resumo:
 
 O TPC5 consistiu em criar uma aplicação para um cinema onde se pode:
 * adicionar cinemas
