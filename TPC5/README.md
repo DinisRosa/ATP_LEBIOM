@@ -16,19 +16,23 @@ Estre projeto está dividido em dois ficheiros de código python e um ficheiro .
 * 'TPC5_functions.py' onde estão defenidas todas as funções do programas
 * 'lista_de_cinemas.txt' onde est+a guardado todo o cinema (nomes de filmes, total de lugares e lugares ocupados)
 
+
 'lista_de_cinemas.txt'
 * 'nomeFilme::maxLugares::ints'
 * nomeFilme -> corresponde ao nome do filme
 * maxLugares -> corresponde ao total de lugares disponiveis
 * ints -> correspode aos lugares ocupados do filme, -1 se não houver nenhum (defalt) ou ints separados entre si por '::'
 
+
 As funções estão divididas em grupos:
 * LER / GUARDAR AS SALAS DE CINEMA NO FICHEIRO .txt
 - lerCinema(nomeCinematxt): criação da função que cria ou lê um ficheiro .txt (retorna um cinema)
 - guardarCinema(nomeCinematxt, cinema): guardar um cinema em um ficheiro .txt
 
+
 * MENU
 - menu(): dá print de todas as opões possiveis do programa, interface do programa
+
 
 * FUNÇÕES PRINCIPAIS
 - showCinema(cinema): mostra no ecrã uma 'tabela' com os vários filmes, sala e total máximo de lugares
