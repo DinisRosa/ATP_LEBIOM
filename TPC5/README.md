@@ -14,7 +14,7 @@ O TPC5 consistiu em criar uma aplicação para um cinema onde se pode:
 Estre projeto está dividido em dois ficheiros de código python e um ficheiro .txt:
 * 'TPC5_main.py' onde se encontra o main loop do programa
 * 'TPC5_functions.py' onde estão defenidas todas as funções do programas
-* 'lista_de_cinemas.txt' onde est+a guardado todo o cinema (nomes de filmes, total de lugares e lugares ocupados)
+* 'lista_de_cinemas.txt' onde está guardado todo o cinema (nomes de filmes, total de lugares e lugares ocupados)
 
 
 'lista_de_cinemas.txt'
