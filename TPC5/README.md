@@ -49,5 +49,4 @@ As funções estão divididas em grupos:
 - ordenaLugares(cinema): usando a função acimaa, ordena os lugares ocupados de todas as salas do cinema
 - maxList(list): retorna o maior int de uma lista
 - maxLenString(list): retorna o número de caracteres do filme com maior nome 
-- linha(len=44): desenha uma linha com len '-'
-
+- linha(len=44): desenha uma linha de '-' com uma certe len
