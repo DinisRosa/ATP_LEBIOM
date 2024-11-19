@@ -26,14 +26,14 @@ Estre projeto está dividido em dois ficheiros de código python e um ficheiro .
 
 
 As funções estão divididas em grupos:
-    CARREGAR / GUARDAR EM FICHEIRO .txt
-- carregaTabMeteo(fnome): carrega uma tabela de metereologia de um ficheiro .txt (retorna uma tabela)
-- guardarTabMeteo(t, fnome): guardar uma tabela em um ficheiro .txt
+* CARREGAR / GUARDAR EM FICHEIRO .txt
+    - carregaTabMeteo(fnome): carrega uma tabela de metereologia de um ficheiro .txt (retorna uma tabela)
+    - guardarTabMeteo(t, fnome): guardar uma tabela em um ficheiro .txt
 
-MENU
+* MENU
     - menu(): dá print de todas as opões possiveis do programa, interface do programa
 
-FUNCTIONS
+* FUNCTIONS
     - medias(t): calcula a média da temperatura diária
     - minMin(t): temperatura mínima da tabela
     - amplTerm(t): calcula a amplitude térmica diária
@@ -41,5 +41,5 @@ FUNCTIONS
     - diasChuvosos(t, p): calcula o totla de dias com precipitação assima de p
     - maxPeriodoCalor(t, p): calcula o maior número consecutivo de dias com precipitação abaixo de p
 
-DESENHAR GRÁFICOS
+* DESENHAR GRÁFICOS
     - grafs(t): duas opções -> 1º plot da temperatura mínima e máxima 2º bar plot dos valores de precipitação
