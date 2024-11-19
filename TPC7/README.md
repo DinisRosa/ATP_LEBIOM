@@ -30,16 +30,16 @@ As funções estão divididas em grupos:
 - carregaTabMeteo(fnome): carrega uma tabela de metereologia de um ficheiro .txt (retorna uma tabela)
 - guardarTabMeteo(t, fnome): guardar uma tabela em um ficheiro .txt
 
-    MENU
-- menu(): dá print de todas as opões possiveis do programa, interface do programa
+MENU
+    - menu(): dá print de todas as opões possiveis do programa, interface do programa
 
-    FUNCTIONS
-- medias(t): calcula a média da temperatura diária
-- minMin(t): temperatura mínima da tabela
-- amplTerm(t): calcula a amplitude térmica diária
-- maxChuva(t): dia e valor da maior qunatidade de precipitação
-- diasChuvosos(t, p): calcula o totla de dias com precipitação assima de p
-- maxPeriodoCalor(t, p): calcula o maior número consecutivo de dias com precipitação abaixo de p
+FUNCTIONS
+    - medias(t): calcula a média da temperatura diária
+    - minMin(t): temperatura mínima da tabela
+    - amplTerm(t): calcula a amplitude térmica diária
+    - maxChuva(t): dia e valor da maior qunatidade de precipitação
+    - diasChuvosos(t, p): calcula o totla de dias com precipitação assima de p
+    - maxPeriodoCalor(t, p): calcula o maior número consecutivo de dias com precipitação abaixo de p
 
-    DESENHAR GRÁFICOS
-- grafs(t): duas opções -> 1º plot da temperatura mínima e máxima 2º bar plot dos valores de precipitação
+DESENHAR GRÁFICOS
+    - grafs(t): duas opções -> 1º plot da temperatura mínima e máxima 2º bar plot dos valores de precipitação
