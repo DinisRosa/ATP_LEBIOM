@@ -9,23 +9,48 @@ def Abrir_DataSet(file_name: str) -> list:
     return DATA_SET
 
 
-def Guardar_DataSet(file_name: str, dataSet: list):
+def Guardar_DataSet(file_name: str, dataSet: list) -> None:
     file = open(file_name, 'w', encoding = 'utf8')
     json.dump(dataSet, file, ensure_ascii = False)
     file.close()
 
 
-def ProcurarPost_PorNome(dataSet: list, nomeAutor: str):
-    postsDoAutor = []
-    for post in dataSet:
-        for autor in post['authors']:
-            if autor['name'] == nomeAutor:
-                postsDoAutor.append(post['title'])
+# Subdivisão da base de dados para facilitar pesquisa
+def all_DOI_path(base: list) -> list:
+    DOI_path = []
+    for i, pub in enumerate(base):
+        if 'doi' in pub.keys():
+            DOI_path.append((pub['doi'][29:], i))
+    return sorted(DOI_path, key=lambda tuplo: int(tuplo[0]))
 
-    return postsDoAutor
+
+def all_PublishDates(base: list) -> list:
+    Pub_Dates = []
+    for i, pub in enumerate(base):
+        if 'publish_date' in pub.keys():
+            Pub_Dates.append((pub['publish_date'][:11], i))
+            
+    return sorted(Pub_Dates, key=lambda data: int(data[0].split('-')[0] + data[0].split('-')[1] + data[0].split('-')[2]))
 
 
-def novoPost_Data():
+def all_KeyWords(base: list) -> list:
+    KeyWords = []
+    for i, pub in enumerate(base):
+        if 'keywords' in pub.keys():
+                KeyWords.append(([''.join(char for char in pub['keywords'] if char not in '!,?')]))
+                KeyWords.append((pub['keywords'].split(','), i))
+    return KeyWords
+
+
+def all_Authors(base: list) -> list:
+    Authors = []
+    for i, pub in enumerate(base):
+        if 'authors' in pub.keys():
+            Authors.append(([nome['name'] for nome in pub['authors']], i))
+    return Authors
+
+# Adicionar novo post
+def novoPost_Data() -> str:
     MaxdaysPerMonth = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 29)
     publish_year = input('Digite o ano da publicação que quer adicionar: ')
     while (not publish_year.isdigit()) or (1900 > int(publish_year) or int(publish_year) > datetime.now().year):
@@ -66,7 +91,8 @@ def novoPost_Abstract():
     return abstract
 
 
-def novoPost_KeyWords():
+def novoPost_KeyWords() -> str:
+    print('EX: "Portugal, Medicina, Hospital, ..."')
     keywords = input('Quais as palavras-chave da publicação que quer adicionar: ')
     while keywords == '':
         keywords = input('Por favor digite palavras-chave válidas! ')
@@ -74,7 +100,7 @@ def novoPost_KeyWords():
     return keywords
 
 
-def novoPost_doiPath():
+def novoPost_doiPath() -> str:
     doiPath = input('Digite o caminho DOI da publicação que quer adicionar: ')
     while doiPath == '':
         doiPath = input('Por favor digite um DOI válido! ')
@@ -82,7 +108,7 @@ def novoPost_doiPath():
     return doiPath
 
 
-def novoPost_pdfPath():
+def novoPost_pdfPath() -> str:
     pdfPath = input('Digite o caminho de PDF da publicação que quer adicionar: ')
     while pdfPath == '':
         pdfPath = input('Por favor digite um caminho de PDF válido! ')
@@ -90,14 +116,15 @@ def novoPost_pdfPath():
     return pdfPath
 
 
-def novoPost_Title():
+def novoPost_Title() -> str:
     title = input('Digite o título da publicação que quer adicionar: ')
     while title == '':
         title = input('Por favor digite um título válido! ')
 
     return title
 
-def novoPost_Url():
+
+def novoPost_Url() -> str:
     urlPath =  input('Digite o caminho URL da publicação que quer adicionar: ')
     while urlPath == '':
         urlPath = input('Por favor digite um URL válido! ')
@@ -105,7 +132,21 @@ def novoPost_Url():
     return urlPath
 
 
-def novoPost():
+def novoPost_Authors() -> list:
+    Autores = []
+    maisAutor = True
+    while maisAutor:
+        autor = input('Qual o nome do autor da publicação que quer adicionar: ')
+        while autor == '':
+            autor = input('Por favor digite um nome válido! ')
+        Autores.append(autor)
+        continuar = input('Dseja continuar: (S) SIM, (N) NÃO: ')
+        maisAutor = True if continuar.upper() == 'S' else False
+    
+    return Autores
+
+
+def novoPost() -> dict:
     newPost = {
         "abstract": novoPost_Abstract(),
         "keywords": novoPost_KeyWords(),
@@ -119,31 +160,62 @@ def novoPost():
 
     return newPost
 
-def idxPost(dataSet: list):
-    print(f'Como deseja procurar pelo post:')
-    for i, key in enumerate(dataSet[0].keys()):
-        print(f'    ({i+1}) {key}')
-    op = input('>>>> ')
-    if op == '1': # abstract
-        pass
-    if op == '2': # keywords
-        pass
-    if op == '3': # authors
-        pass
-    if op == '4': # doi
-        pass
-    if op == '5': # pdf
-        pass
-    if op == '6': # publish_date
-        pass
-    if op == '7': # title
-        pass
-    if op == '8': # url
-        pass
+
+### Ñ é assim que quero
+def ProcurarPost_PorNome(dataSet: list, nomeAutor: str):
+    postsDoAutor = []
+    for post in dataSet:
+        for autor in post['authors']:
+            if autor['name'] == nomeAutor:
+                postsDoAutor.append(post['title'])
+
+    return postsDoAutor
 
 
-
-
-def ApagarPost():
+def ProcurarPost_PorDOI(base: list, baseDOI: list, DOI: int):
     pass
+
+
+# ERRADO
+def BinarySearch(lista: list, alvo: any) -> int:
+    min: int = 0
+    max: int = len(lista) - 1
+    idx: int = (min+max) // 2
+    while lista[idx][1] != alvo or min >= max:
+        if lista[idx][1] < alvo:
+            min = idx + 1
+        else:
+            max = idx - 1
+        idx = (min+max) // 2
+    return idx
+
+
+def idxPost(dataSet: list) -> int:
+    print('''Como deseja procurar pelo post:
+    (1) Por palavras chave
+    (2) Por autores
+    (3) Por data de publicação
+    (4) Por DOI path
+    (0) Sair''')
+
+    op: str = input('Digite o número da opção: ')
+    while op != '0':
+        if op == '1': # keywords
+            pass
+        elif op == '2': # authors
+            pass
+        elif op == '3': # publish_date
+            pass
+        elif op == '4': # doi
+            pass
+        else:
+            op = input('Digite uma opção válida: ')
+
+
+def ApagarPost(base: list, idx: int) -> list:
+    if idx == -1:
+        print('Index não existe!')
+    else:
+        base.pop(idx)
+    return base
 

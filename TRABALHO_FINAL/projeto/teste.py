@@ -1,8 +1,26 @@
 from CRUD_menagment import *
-from datetime import datetime
+import random
 
 base = Abrir_DataSet('DataSet_Main.json')
 
+print(len(base))
+
+#idxPost(base)
+
+'''
+DOIs = []
+for i in base:
+    DOIs.append(i['doi'][29:])
 
 
-idxPost(base)
+print(DOIs)
+print(len(DOIs))    
+'''
+
+'''
+dois = all_PublishDates(base)
+print(dois)'''
+
+
+print(len(all_Authors(base)))
+
