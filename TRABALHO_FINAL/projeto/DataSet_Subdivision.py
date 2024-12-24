@@ -1,52 +1,59 @@
 # Subdivisão da base de dados para facilitar pesquisa
-def all_DOI_path(base: list) -> list:
-    DOI_path = []
+def all_DOI_path(base: list) -> dict:
+    DoiPathDict: dict[str, list[int]] = {}
     for i, pub in enumerate(base):
         if 'doi' in pub.keys():
-            DOI_path.append((pub['doi'][29:], i))
-    return sorted(DOI_path, key=lambda tuplo: int(tuplo[0]))
+            doi_key: str = pub['doi'][29:]
+            if doi_key not in DoiPathDict:
+                DoiPathDict[doi_key] = [i]
+            else:
+                DoiPathDict[doi_key].append(i)
+    return {k: DoiPathDict[k] for k in sorted(DoiPathDict)}
 
 
-def all_PublishDates(base: list) -> list:
-    Pub_Dates = []
+def all_PublishDates(base: list) -> dict:
+    PubDatesDict: dict[str, list[int]] = {}
     for i, pub in enumerate(base):
         if 'publish_date' in pub.keys():
-            Pub_Dates.append((pub['publish_date'][:11], i))
-            
-    return sorted(Pub_Dates, key=lambda data: int(data[0].split('-')[0] + data[0].split('-')[1] + data[0].split('-')[2]))
+            date_key: str = pub['publish_date'][:11]
+            if date_key not in PubDatesDict:
+                PubDatesDict[date_key] = [i]
+            else:
+                PubDatesDict[date_key].append(i)
+    return {k: PubDatesDict[k] for k in sorted(PubDatesDict)}
 
 
-def all_KeyWords(base: list) -> list:
-    KeyWords = []
+def all_KeyWords(base: list) -> dict:
+    KeyWordsDict: dict[str, list[int]] = {}
     for i, pub in enumerate(base):
         if 'keywords' in pub.keys():
-                KeyWords.append(''.join(char for char in pub['keywords'] if char not in '!,?'))
-                KeyWords.append((pub['keywords'].split(','), i))
-    return KeyWords
+            pubKeyWords: list[str] = ''.join(char for char in pub['keywords'] if char not in '!.?').split(',')
+            for key in pubKeyWords:
+                if key[0] == ' ':
+                    key = key[1:]
+                if key not in KeyWordsDict:
+                    KeyWordsDict[key] = [i]
+                else:
+                    KeyWordsDict[key].append(i)
+    return {k: KeyWordsDict[k] for k in sorted(KeyWordsDict)}
 
-def all_KeyWords2(base: list) -> dict:
-    KeyWordsDict:dict = {}
-    for i, pub in enumerate(base):
-        if 'authors' in pub.keys():
-            pubKeyWords = ''.join(char for char in pub['keywords'] if char not in '!,?').split(',')
-    return KeyWordsDict
-
-
-'''def all_Authors(base: list) -> list:
-    Authors = []
-    for i, pub in enumerate(base):
-        if 'authors' in pub.keys():
-            Authors.append(([nome['name'] for nome in pub['authors']], i))
-    return Authors'''
 
 def all_Authors(base: list) -> dict:
-    AuthorsDict: dict = {}
+    AuthorsDict: dict[str, list[int]] = {}
     for i, pub in enumerate(base):
         if 'authors' in pub.keys():
-            pubAuthors = [nome['name'] for nome in pub['authors']]
+            pubAuthors: list[str] = [nome['name'] for nome in pub['authors']]
             for author in pubAuthors:
                 if author not in AuthorsDict:
                     AuthorsDict[author] = [i]
                 else:
                     AuthorsDict[author].append(i)
-    return AuthorsDict
+    return {k: AuthorsDict[k] for k in sorted(AuthorsDict)}
+
+
+def UpdateIndexes(base: list) -> tuple[dict, dict, dict, dict]:
+    doiDict = all_DOI_path(base)
+    pdDict = all_PublishDates(base)
+    kwDict = all_KeyWords(base)
+    autDict = all_Authors(base)
+    return doiDict, pdDict, kwDict, autDict

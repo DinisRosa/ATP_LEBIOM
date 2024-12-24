@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 # Adicionar novo post
 def novoPost_Data() -> str:
     MaxdaysPerMonth = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 29)
@@ -110,3 +111,19 @@ def novoPost() -> dict:
     }
 
     return newPost
+
+
+# Apagar post por idx
+def ApagarPost(base: list, idxs: list) -> list:
+    print('Publicações encontradas: ')
+    for i in idxs:
+        print(f'    ({i}) -> {base[i]['title']}')
+    n = input('Digite o número da publicação que deseja apagar: ')
+    if int(n) in idxs:
+        del base[int(n)]
+        print(f'Publicação {n} apagada com sucesso!')
+    else:
+        print('Nenuma publicação apagada.')
+    return base
+
+
