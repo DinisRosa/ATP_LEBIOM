@@ -1,5 +1,3 @@
-from Functions.main_Import_FunctionsFolder import *
-
 def idxPost(doiDict: dict, pdDict: dict, kwDict: dict, autDict: dict) -> list:
     print('''Como deseja procurar pelo post:
     (1) Por palavras chave

@@ -7,10 +7,11 @@ from Interface.main_Import_InterfaceFolder import *
 caminho_ficheiro = 'DataSet_Main.json'
 
 # Funções para gestão de ficheiros
-def carregar_dados(caminho_ficheiro):
-    dados = []
-    if not os.path.exists(caminho_ficheiro):
-        sg.popup_error(f'O arquivo {caminho_ficheiro} não existe ou não está acessível.')
+def carregar_dados(path=None):
+    if not path:
+        caminho_ficheiro = sg.popup_get_file('Selecione o arquivo para importar', no_window=True)
+    else:
+        caminho_ficheiro = path
     try:
         file: list = open(caminho_ficheiro, 'r', encoding = 'utf8')
         DATA_SET: list = json.load(file)
@@ -20,23 +21,18 @@ def carregar_dados(caminho_ficheiro):
 
     return dados
 
-def guardar_dados(caminho_ficheiro, dados):
+def guardar_dados(base, path=None):
+    if not path:
+        caminho_ficheiro = sg.popup_get_file('Salvar como', save_as=True, no_window=True, file_types=(("JSON Files", "*.json"),))
+    else:
+        caminho_ficheiro = path
     try:
         file = open(caminho_ficheiro, 'w', encoding = 'utf8')
-        json.dump(dados, file, ensure_ascii = False)
+        json.dump(base, file, ensure_ascii = False)
         file.close()
     except Exception as e:
         sg.popup_error(f'Erro ao guardar os dados: {e}')
 
-def exportar_dados(dados):
-    caminho_exportacao = sg.popup_get_file('Salvar como', save_as=True, no_window=True, file_types=(("JSON Files", "*.json"),))
-    if caminho_exportacao:
-        try:
-            with open(caminho_exportacao, 'w') as ficheiro:
-                json.dump(dados, ficheiro, indent=4)
-            sg.popup('Dados exportados com sucesso!')
-        except Exception as e:
-            sg.popup_error(f'Erro ao exportar os dados: {e}')
 
 
 # Funções para lidar com os dados de publicações
@@ -70,7 +66,7 @@ def criar_publicacao():
                 if data_publicacao > data_atual:
                     sg.popup_error('A data de publicação não pode ser posterior à data atual!')
                     continue
-                dados = carregar_dados(caminho_ficheiro)
+                dados = carregar_dados(path=caminho_ficheiro)
                 dados.append(values)
                 guardar_dados(caminho_ficheiro, dados)
                 window.close()
@@ -81,7 +77,7 @@ def criar_publicacao():
 
 
 def atualizar_publicacao():
-    dados = carregar_dados(caminho_ficheiro)
+    dados = carregar_dados(path=caminho_ficheiro)
     titulos = [pub['title'] for pub in dados]
     layout = [
         [sg.Text('Selecione a publicação para atualizar:')],
@@ -126,7 +122,7 @@ def atualizar_publicacao():
                                 sg.popup_error('A data de publicação não pode ser posterior à data atual!')
                                 continue
                             pub.update(values_atualizar)
-                            guardar_dados(caminho_ficheiro, dados)
+                            guardar_dados(base=dados, path=caminho_ficheiro)
                             sg.popup('Publicação atualizada com sucesso!')
                             window_atualizar.close()
                             finnished2 = True
@@ -158,7 +154,7 @@ def pesquisar_publicacao():
             return filtro_data_publicacao()
         elif event == 'Filtrar por Palavras-chave':
             return filtro_palavras_chave()
-base = carregar_dados(caminho_ficheiro)
+base = carregar_dados(path=caminho_ficheiro)
 
 
 def filtro_titulo():
@@ -174,7 +170,7 @@ def filtro_titulo():
             return None
         elif evento == 'Pesquisar':
             titulo = values['titulo'].lower()
-            dados = carregar_dados(caminho_ficheiro)
+            dados = carregar_dados(path=caminho_ficheiro)
             resultados = [pub for pub in dados if titulo in pub['title'].lower()]
             exibir_resultados(resultados)
             window.close()
@@ -196,7 +192,7 @@ def filtro_autor():
             if not autor:
                 sg.popup('Sem resultados', font=('Helvetica', 12), title='Resultado da Pesquisa')
                 continue
-            dados = carregar_dados(caminho_ficheiro)
+            dados = carregar_dados(path=caminho_ficheiro)
             resultados = []
             for pub in dados:
                 autores = [a.lower().strip() for a in pub['authors']]
@@ -225,7 +221,7 @@ def filtro_data_publicacao():
             finnished = True
         elif evento == 'Pesquisar':
             data = values['data']
-            dados = carregar_dados(caminho_ficheiro)
+            dados = carregar_dados(path=caminho_ficheiro)
             if len(data) == 4:  # Se o usuário digitou apenas o ano
                 resultados = [pub for pub in dados if pub['publish_date'].startswith(data)]
             else:
@@ -250,7 +246,7 @@ def filtro_palavras_chave():
             return None
         elif evento == 'Pesquisar':
             palavra_chave = values['palavra_chave'].lower()
-            dados = carregar_dados(caminho_ficheiro)
+            dados = carregar_dados(path=caminho_ficheiro)
             resultados = [pub for pub in dados if palavra_chave in pub['keywords'].lower()]
             exibir_resultados(resultados)
             window.close()
@@ -526,7 +522,7 @@ def gerar_grafico_publicacoes_por_ano_autor(base):
     # Layout para selecionar o autor
     layout = [
         [sg.Text('Selecione o autor:')],
-        [sg.Combo(autores.keys(), key='autor')],
+        [sg.Combo([autor for autor in sorted(autores.keys())], key='autor')],
         [sg.Button('Gerar Gráfico'), sg.Button('Cancelar')]
     ]
     
@@ -546,11 +542,14 @@ def gerar_grafico_publicacoes_por_ano_autor(base):
                 publicacoes = autores[autor]
                 anos = {}
                 for i in publicacoes:
+                    if 'publish_date' not in base[i]:
+                        continue
                     ano = base[i]['publish_date'][:4]
                     if ano not in anos:
                         anos[ano] = 1
                     else:
                         anos[ano] += 1
+                anos = dict(sorted(anos.items()))
                 plt.bar(anos.keys(), anos.values())
                 plt.xlabel('Ano')
                 plt.ylabel('Número de Publicações')
@@ -562,13 +561,21 @@ def gerar_grafico_publicacoes_por_ano_autor(base):
 
 def gerar_grafico_top_palavras_chave(base):
     palavras_chave = {}
-    for pub in base:
-        for palavra in pub['keywords'].split(','):
-            palavra = palavra.strip()
-            palavras_chave[palavra] = palavras_chave.get(palavra, 0) + 1
-    top_palavras = sorted(palavras_chave.items(), key=lambda x: -x[1])[:20]
-    palavras, quantidades = zip(*top_palavras)
-    plt.barh(palavras, quantidades)
+    for i, pub in enumerate(base):
+        if 'keywords' in pub.keys():
+            pubKeyWords: list[str] = ''.join(char for char in pub['keywords'] if char not in '!.?').split(',')
+            for key in pubKeyWords:
+                if key[0] == ' ':
+                    key = key[1:]
+                if key not in palavras_chave:
+                    palavras_chave[key] = 1
+                else:
+                    palavras_chave[key] += 1
+
+    top_palavras = sorted(palavras_chave.items(), key=lambda tuplo: tuplo[1], reverse=True)[:20]
+    top_palavras = dict(top_palavras)   
+
+    plt.barh(top_palavras.keys(), top_palavras.values())
     plt.xlabel('Frequência')
     plt.ylabel('Palavras-chave')
     plt.title('Top 20 Palavras-chave mais Frequentes')
@@ -576,30 +583,38 @@ def gerar_grafico_top_palavras_chave(base):
     plt.show()
 
 def gerar_grafico_palavras_chave_por_ano(base):
-    dados = carregar_dados(caminho_ficheiro)
-    anos = sorted(set(pub['publish_date'].split('-')[0] for pub in dados))
+    anos = sorted(set(pub['publish_date'].split('-')[0] for pub in base if 'publish_date' in pub))
     layout = [
         [sg.Text('Selecione o ano:')],
         [sg.Combo(anos, key='ano')],
         [sg.Button('Gerar Gráfico'), sg.Button('Cancelar')]
     ]
     window = sg.Window('Palavras-chave por Ano', layout)
-    while True:
+    finnished = False
+    while not finnished:
         event, values = window.read()
         if event == sg.WINDOW_CLOSED or event == 'Cancelar':
             window.close()
+            finnished = True
             return
         elif event == 'Gerar Gráfico':
             ano = values['ano']
             if ano:
                 palavras_chave = {}
-                for pub in dados:
-                    if pub['publish_date'].startswith(ano):
-                        for palavra in pub['keywords'].split(','):
-                            palavra = palavra.strip()
-                            if palavra:
-                                palavras_chave[palavra] = palavras_chave.get(palavra, 0) + 1
+                publicacoes = [pub for pub in base if 'publish_date' in pub and pub['publish_date'][:4] == ano]
+                for pub in publicacoes:
+                        if 'keywords' not in pub.keys():
+                            continue
+                        pubKeyWords: list[str] = ''.join(char for char in pub['keywords'] if char not in '!.?').split(',')
+                        for key in pubKeyWords:
+                            if key[0] == ' ':
+                                key = key[1:]
+                            if key not in palavras_chave:
+                                palavras_chave[key] = 1
+                            else:
+                                palavras_chave[key] += 1
                 if palavras_chave:
+                    palavras_chave = dict(sorted(palavras_chave.items(), reverse=True)[:20])
                     plt.bar(palavras_chave.keys(), palavras_chave.values())
                     plt.xlabel('Palavras-chave')
                     plt.ylabel('Número de Publicações')
@@ -609,6 +624,7 @@ def gerar_grafico_palavras_chave_por_ano(base):
                 else:
                     sg.popup('Nenhuma palavra-chave encontrada para o ano especificado.', font=('Helvetica', 12), title='Resultado da Pesquisa')
             window.close()
+            finnished = True
             return
 
 def mostrar_ajuda():
@@ -626,17 +642,17 @@ def mostrar_ajuda():
 def importar_dados():
     caminho_importacao = sg.popup_get_file('Selecione o arquivo para importar')
     if caminho_importacao:
-        novos_dados = carregar_dados(caminho_importacao)
+        novos_dados = carregar_dados(path=caminho_importacao)
         if novos_dados:
             base.extend(novos_dados)
             sg.popup('Dados importados com sucesso!')
 
-base = carregar_dados(caminho_ficheiro)
+base = carregar_dados(path=caminho_ficheiro)
 
 # GUI Principal
 def GUI_main(caminho_ficheiro='DataSet_Main.json'):
     sg.theme('DarkAmber')
-    base = carregar_dados(caminho_ficheiro)
+    base = carregar_dados(path=caminho_ficheiro)
 
     layout_principal = [
         [sg.Text('Sistema de Gestão de Publicações', font=('Helvetica', 20), justification='center')],
@@ -646,8 +662,7 @@ def GUI_main(caminho_ficheiro='DataSet_Main.json'):
                 [sg.Button('Apagar Publicação')],
                 [sg.Button('Atualizar Publicação')],
                 [sg.Text('')], [sg.Text('')], [sg.Text('')], [sg.Text('')], [sg.Text('')], [sg.Text('')],
-                [sg.Push(), sg.Button('Carregar Data Set'), sg.Button('Guardar Data Set')],
-                [sg.Push(), sg.Button('Importar Dados'), sg.Button('Exportar Dados')],
+                [sg.Push(), sg.Button('Carregar DataSet'), sg.Button('Guardar DataSet')],
             ])],
             [sg.Tab('Estatísticas', [
             [sg.Button('Distribuição por Ano')],
@@ -670,13 +685,13 @@ def GUI_main(caminho_ficheiro='DataSet_Main.json'):
     ]
 
     executar = True
-    base = carregar_dados(caminho_ficheiro)
+    base = carregar_dados(path=caminho_ficheiro)
     window = sg.Window('Gestor de Publicações', layout_principal, size=(800, 600))
 
     while executar:
-        evento, valores = window.read()
+        evento, _ = window.read()
         if evento == sg.WINDOW_CLOSED or evento == 'Sair':
-            guardar_dados(caminho_ficheiro, base)
+            guardar_dados(path=caminho_ficheiro, base=base)
             executar = False
         elif evento == 'Adicionar Publicação':
             nova_publicacao = criar_publicacao()
@@ -686,16 +701,12 @@ def GUI_main(caminho_ficheiro='DataSet_Main.json'):
             gerenciar_publicacoes(base)
         elif evento == 'Atualizar Publicação':
             atualizar_publicacao()
-        elif evento == 'Carregar Dataset':
-            base = carregar_dados(caminho_ficheiro)
+        elif evento == 'Carregar DataSet':
+            base = carregar_dados()
             sg.popup('Dataset carregado com sucesso!')
-        elif evento == 'Guardar Dataset':
-            guardar_dados(caminho_ficheiro, base)
+        elif evento == 'Guardar DataSet':
+            guardar_dados(base=base)
             sg.popup('Dataset guardado com sucesso!')
-        elif evento == 'Importar Dados':
-            importar_dados()
-        elif evento == 'Exportar Dados':
-            exportar_dados(base)
         elif evento == 'Exportar Dados Parciais':
             resultados = pesquisar_publicacao()  # Supondo que esta função retorna os resultados da pesquisa
             if resultados:

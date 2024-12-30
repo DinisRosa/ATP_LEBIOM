@@ -1,4 +1,4 @@
-from Functions.main_Import_FunctionsFolder import *
+from Interface.main_Import_InterfaceFolder import *
 from Interface.interfaceDone import *
 
 def UI():
@@ -40,7 +40,6 @@ def Terminal_Interface():
         elif op == 3:
             Guardar_DataSet('../TRABALHO_FINAL/DataBase_New.json', DATA_SET)
 
-
         elif op == 4:
             DATA_SET.append(novoPost())
             doiDict, pdDict, kwDict, autDict = UpdateIndexes(DATA_SET)
@@ -50,6 +49,7 @@ def Terminal_Interface():
             if idx != [-1]:
                 DATA_SET = ApagarPost(DATA_SET, idx)
                 doiDict, pdDict, kwDict, autDict = UpdateIndexes(DATA_SET)
+
         elif op == 6:
             print('''Se precisar de ajuda, consulte o arquivo README.md no repositório do projeto no GitHub.
     Link Repo: https://github.com/DinisRosa/ATP_LEBIOM/tree/main/TRABALHO_FINAL''')
@@ -57,11 +57,11 @@ def Terminal_Interface():
     print('Obrigado, volte sempre!')
 
 
-
-if UI() == '1':
+o = UI()
+if o == '1':
     print('Interface Gráfica')
     GUI_main()
-elif UI() == '2':
+elif o == '2':
     Terminal_Interface()
 else:
     print('''Opção inválida! Tente novamente.
