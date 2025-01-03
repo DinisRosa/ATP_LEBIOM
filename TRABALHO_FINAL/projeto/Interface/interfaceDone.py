@@ -8,6 +8,7 @@ caminho_ficheiro = 'DataSet_Main.json'
 
 # Funções para gestão de ficheiros
 def carregar_dados(path=None):
+    dados = []
     if not path:
         caminho_ficheiro = sg.popup_get_file('Selecione o arquivo para importar', no_window=True)
     else:
@@ -141,7 +142,8 @@ def pesquisar_publicacao():
         [sg.Button('Voltar')]
     ]
     window = sg.Window('Pesquisar Publicação', layout)
-    while True:
+    run = True
+    while run:
         event, values = window.read()
         if event == sg.WINDOW_CLOSED or event == 'Voltar':
             window.close()
@@ -154,6 +156,7 @@ def pesquisar_publicacao():
             return filtro_data_publicacao()
         elif event == 'Filtrar por Palavras-chave':
             return filtro_palavras_chave()
+        run = False
 base = carregar_dados(path=caminho_ficheiro)
 
 
@@ -163,18 +166,19 @@ def filtro_titulo():
         [sg.Button('Pesquisar'), sg.Button('Cancelar')]
     ]
     window = sg.Window('Filtrar por Título', layout)
-    while True:
+    run = True
+    while run:
         evento, values = window.read()
         if evento == sg.WINDOW_CLOSED or evento == 'Cancelar':
             window.close()
-            return None
+            run = False
         elif evento == 'Pesquisar':
             titulo = values['titulo'].lower()
             dados = carregar_dados(path=caminho_ficheiro)
             resultados = [pub for pub in dados if titulo in pub['title'].lower()]
             exibir_resultados(resultados)
             window.close()
-        return resultados
+            run = False
 
 def filtro_autor():
     layout = [
@@ -182,11 +186,12 @@ def filtro_autor():
         [sg.Button('Pesquisar'), sg.Button('Cancelar')]
     ]
     window = sg.Window('Filtrar por Autor', layout)
-    while True:
+    run = True
+    while run:
         evento, values = window.read()
         if evento == sg.WINDOW_CLOSED or evento == 'Cancelar':
             window.close()
-            return None
+            run = False
         elif evento == 'Pesquisar':
             autor = values['autor'].lower().strip()
             if not autor:
@@ -195,7 +200,7 @@ def filtro_autor():
             dados = carregar_dados(path=caminho_ficheiro)
             resultados = []
             for pub in dados:
-                autores = [a.lower().strip() for a in pub['authors']]
+                autores = [a['name'].lower().strip() for a in pub['authors']]
                 if any(autor in a for a in autores):
                     resultados.append(pub)
             if resultados:
@@ -204,6 +209,7 @@ def filtro_autor():
             else:
                 sg.popup('Nenhuma publicação encontrada para o autor especificado.', font=('Helvetica', 12), title='Resultado da Pesquisa')
             window.close()
+            run = False
             return resultados
 
 def filtro_data_publicacao():
@@ -223,7 +229,7 @@ def filtro_data_publicacao():
             data = values['data']
             dados = carregar_dados(path=caminho_ficheiro)
             if len(data) == 4:  # Se o usuário digitou apenas o ano
-                resultados = [pub for pub in dados if pub['publish_date'].startswith(data)]
+                resultados = [pub for pub in dados if 'publish_date' in pub.keys() and pub['publish_date'].startswith(data)]
             else:
                 resultados = [pub for pub in dados if data in pub['publish_date']]
             resultados.sort(key=lambda x: x['publish_date'], reverse=True)
@@ -267,24 +273,25 @@ def exibir_resultados(resultados):
     for pub in resultados:
         layout.append([sg.Text('Título:', font=('Helvetica', 12, 'bold')), sg.Text(pub['title'])])
         layout.append([sg.Text('Resumo:', font=('Helvetica', 12, 'bold')), sg.Text(pub['abstract'])])
-        layout.append([sg.Text('Palavras-chave:', font=('Helvetica', 12, 'bold')), sg.Text(pub['keywords'])])
-        layout.append([sg.Text('Autores:', font=('Helvetica', 12, 'bold')), sg.Text(', '.join(pub['authors']))])
-        layout.append([sg.Text('DOI:', font=('Helvetica', 12, 'bold')), sg.Text(pub['doi'])])
-        layout.append([sg.Text('Caminho do PDF:', font=('Helvetica', 12, 'bold')), sg.Text(pub['pdf'])])
-        layout.append([sg.Text('URL:', font=('Helvetica', 12, 'bold')), sg.Text(pub['url'])])
-        layout.append([sg.Text('Data de publicação:', font=('Helvetica', 12, 'bold')), sg.Text(pub['publish_date'])])
+        layout.append([sg.Text('Palavras-chave:', font=('Helvetica', 12, 'bold')), sg.Text(pub['keywords'] if 'keywords' in pub else 'N/A')])
+        layout.append([sg.Text('Autores:', font=('Helvetica', 12, 'bold')), sg.Text(', '.join(autor['name'] for autor in pub['authors']))])
+        layout.append([sg.Text('DOI:', font=('Helvetica', 12, 'bold')), sg.Text(pub['doi'] if 'doi' in pub else 'N/A')])
+        layout.append([sg.Text('Caminho do PDF:', font=('Helvetica', 12, 'bold')), sg.Text(pub['pdf'] if 'pdf' in pub else 'N/A')])
+        layout.append([sg.Text('URL:', font=('Helvetica', 12, 'bold')), sg.Text(pub['url'] if 'url' in pub else 'N/A')])
+        layout.append([sg.Text('Data de publicação:', font=('Helvetica', 12, 'bold')), sg.Text(pub['publish_date'] if 'publish_date' in pub else 'Sem data')])
         layout.append([sg.Text('-' * 40)])
     layout.append([sg.Button('Exportar Pesquisa'), sg.Button('Fechar')])
-    window = sg.Window('Resultados da Pesquisa', layout, modal=True)
-    while True:
+    window = sg.Window('Resultados da Pesquisa', layout, location= (100,100), modal=True)
+    run = True
+    while run:
         evento, values = window.read()
         if evento == sg.WINDOW_CLOSED or evento == 'Fechar':
             window.close()
-            return
+            run = False
         elif evento == 'Exportar Pesquisa':
             exportar_dados_parcial(resultados)
             sg.popup('Pesquisa exportada com sucesso!')
-            return
+            run = False
 
 def analise_post():
     layout = [
@@ -332,7 +339,6 @@ def PrintDataSet(base):
         else:
             pub_info = f"{i}: {pub['title']} (Sem data)"
         layout_base.append([sg.Text(pub_info)])
-
 
     layout = [
         [sg.Column(layout_base, scrollable=True, vertical_scroll_only=True, size=(800, 500))]
@@ -465,11 +471,12 @@ def gerar_grafico_publicacoes_por_mes(base):
     
     window = sg.Window('Distribuição de Publicações por Mês', layout)
     
-    while True:
+    run = True
+    while run:
         event, values = window.read()
         if event == sg.WINDOW_CLOSED or event == 'Cancelar':
             window.close()
-            return
+            run = False
         elif event == 'Gerar Gráfico':
             ano = values['ano']
             if ano:
@@ -480,13 +487,14 @@ def gerar_grafico_publicacoes_por_mes(base):
                     data = pub['publish_date'].split('-')
                     if data[0] == ano:
                         meses[data[1]] += 1
+                meses = dict(sorted(meses.items(), key= lambda tuplo: tuplo[0])[:20])
                 plt.bar(meses.keys(), meses.values())
                 plt.xlabel('Mês')
                 plt.ylabel('Número de Publicações')
                 plt.title(f'Distribuição de Publicações por Mês em {ano}')
                 plt.show()
             window.close()
-            return
+            run = False
 
 def gerar_grafico_top_autores(base):
     autores = {}
@@ -498,9 +506,8 @@ def gerar_grafico_top_autores(base):
                     autores[author] = 0
                 else:
                     autores[author] += 1
-    top_autores = sorted(autores.items(), key=lambda x: -x[1])[:20]
-    nomes, quantidades = zip(*top_autores)
-    plt.barh(nomes, quantidades)
+    top_autores = dict(sorted(autores.items(), key= lambda tuplo: tuplo[1], reverse=True)[:20])
+    plt.barh(top_autores.keys(), top_autores.values())
     plt.xlabel('Número de Publicações')
     plt.ylabel('Autores')
     plt.title('Top 20 Autores com Mais Publicações')
@@ -549,7 +556,7 @@ def gerar_grafico_publicacoes_por_ano_autor(base):
                         anos[ano] = 1
                     else:
                         anos[ano] += 1
-                anos = dict(sorted(anos.items()))
+                anos = dict(sorted(anos.items(),key=lambda tuplo: tuplo[1], reverse=True)[:20])
                 plt.bar(anos.keys(), anos.values())
                 plt.xlabel('Ano')
                 plt.ylabel('Número de Publicações')
@@ -614,7 +621,7 @@ def gerar_grafico_palavras_chave_por_ano(base):
                             else:
                                 palavras_chave[key] += 1
                 if palavras_chave:
-                    palavras_chave = dict(sorted(palavras_chave.items(), reverse=True)[:20])
+                    palavras_chave = dict(sorted(palavras_chave.items(), key= lambda tuplo: tuplo[1], reverse=True)[:20])
                     plt.bar(palavras_chave.keys(), palavras_chave.values())
                     plt.xlabel('Palavras-chave')
                     plt.ylabel('Número de Publicações')
