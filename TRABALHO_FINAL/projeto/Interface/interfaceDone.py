@@ -31,6 +31,7 @@ def guardar_dados(base, path=None):
         file = open(caminho_ficheiro, 'w', encoding = 'utf8')
         json.dump(base, file, ensure_ascii = False)
         file.close()
+        sg.popup('Dados guardados com sucesso!')
     except Exception as e:
         sg.popup_error(f'Erro ao guardar os dados: {e}')
 
@@ -51,12 +52,12 @@ def criar_publicacao():
     ]
     window = sg.Window('Adicionar Publicação', layout)
 
-    finnished = False
-    while not finnished:
+    run = True
+    while run:
         evento, values = window.read()
         if evento == sg.WINDOW_CLOSED or evento == 'Cancelar':
             window.close()
-            finnished = True
+            run = False
         elif evento == 'Salvar':
             if not values['title'] or not values['abstract'] or not values['publish_date']:
                 sg.popup_error('Por favor, preencha os campos obrigatórios!')
@@ -68,10 +69,13 @@ def criar_publicacao():
                     sg.popup_error('A data de publicação não pode ser posterior à data atual!')
                     continue
                 dados = carregar_dados(path=caminho_ficheiro)
-                dados.append(values)
-                guardar_dados(caminho_ficheiro, dados)
+                values['authors'] = [{'name': name} for name in values['authors'].split(',')]
+                novoP = {key: values[key] for key in values.keys() if values[key] != ''}
+                dados.append(novoP)
+                guardar_dados(base=dados, path=caminho_ficheiro)
+                sg.popup('Publicação adicionada com sucesso!')
                 window.close()
-                finnished = True
+                run = False
             except ValueError:
                 sg.popup_error('Data de publicação inválida! Use o formato YYYY-MM-DD.')
 
@@ -79,7 +83,7 @@ def criar_publicacao():
 
 def atualizar_publicacao():
     dados = carregar_dados(path=caminho_ficheiro)
-    titulos = [pub['title'] for pub in dados]
+    titulos = [pub['title'] for pub in dados if 'title' in pub.keys()]
     layout = [
         [sg.Text('Selecione a publicação para atualizar:')],
         [sg.Combo(titulos, key='titulo', size=(50, 1))],
@@ -175,8 +179,20 @@ def filtro_titulo():
         elif evento == 'Pesquisar':
             titulo = values['titulo'].lower()
             dados = carregar_dados(path=caminho_ficheiro)
-            resultados = [pub for pub in dados if titulo in pub['title'].lower()]
-            exibir_resultados(resultados)
+            if not titulo:
+                sg.popup('Sem resultados', font=('Helvetica', 12), title='Resultado da Pesquisa')
+                continue
+            resultados = []
+            for pub in dados:
+                if 'title' not in pub.keys():
+                    continue
+                if titulo == pub['title'].lower():
+                    resultados.append(pub)
+            if not resultados:
+                sg.popup('Nenhuma publicação encontrada para o título especificado.', font=('Helvetica', 12), title='Resultado da Pesquisa')
+                continue
+            else:
+                exibir_resultados(resultados)
             window.close()
             run = False
 
@@ -204,7 +220,6 @@ def filtro_autor():
                 if any(autor in a for a in autores):
                     resultados.append(pub)
             if resultados:
-                resultados.sort(key=lambda x: x['authors'])
                 exibir_resultados(resultados)
             else:
                 sg.popup('Nenhuma publicação encontrada para o autor especificado.', font=('Helvetica', 12), title='Resultado da Pesquisa')
@@ -253,8 +268,16 @@ def filtro_palavras_chave():
         elif evento == 'Pesquisar':
             palavra_chave = values['palavra_chave'].lower()
             dados = carregar_dados(path=caminho_ficheiro)
-            resultados = [pub for pub in dados if palavra_chave in pub['keywords'].lower()]
-            exibir_resultados(resultados)
+            resultados = []
+            for pub in dados:
+                if 'keywords' in pub:
+                    if palavra_chave in pub['keywords'].lower():
+                        resultados.append(pub)
+            if not resultados:
+                sg.popup('Nenhuma publicação encontrada para a palavra-chave especificada.', font=('Helvetica', 12), title='Resultado da Pesquisa')
+                continue
+            else:
+                exibir_resultados(resultados)
             window.close()
             return resultados
 
@@ -281,7 +304,7 @@ def exibir_resultados(resultados):
         layout.append([sg.Text('Data de publicação:', font=('Helvetica', 12, 'bold')), sg.Text(pub['publish_date'] if 'publish_date' in pub else 'Sem data')])
         layout.append([sg.Text('-' * 40)])
     layout.append([sg.Button('Exportar Pesquisa'), sg.Button('Fechar')])
-    window = sg.Window('Resultados da Pesquisa', layout, location= (100,100), modal=True)
+    window = sg.Window('Resultados da Pesquisa', layout, location= (100,100), modal=True, size=(800, 600))
     run = True
     while run:
         evento, values = window.read()
@@ -335,9 +358,10 @@ def PrintDataSet(base):
     layout_base = [[sg.Text('Lista de Publicações')]]
     for i, pub in enumerate(base):
         if 'publish_date' in pub:
-            pub_info = f"{i}: '{pub['title'][:90]} (...)' ({pub['publish_date']})"
+            pub_info = f"{i}: '{pub['title'][:90]} (...)' ({pub['publish_date']})" if len(pub['title']) > 90 else f"{i}: '{pub['title']}' ({pub['publish_date']})"
         else:
-            pub_info = f"{i}: {pub['title']} (Sem data)"
+            if 'title' in pub:
+                pub_info = f"{i}: '{pub['title'][:90]} (...)' (Sem data)" if len(pub['title']) > 90 else f"{i}: '{pub['title']}' (Sem data)"
         layout_base.append([sg.Text(pub_info)])
 
     layout = [
@@ -352,7 +376,7 @@ def PrintDataSet(base):
 def gerenciar_publicacoes(base):
     layout = [
         [sg.Listbox(
-            values=[f"{i}: {post['title']}" for i, post in enumerate(base)],
+            values=[f"{i}: {post['title']}" for i, post in enumerate(base) if 'title' in post.keys()],
             size=(50, 10), key='publicacoes', enable_events=True
         )],
         [sg.Button('Adicionar'), sg.Button('Apagar'), sg.Button('Fechar')]
@@ -379,7 +403,7 @@ def gerenciar_publicacoes(base):
                 if confirm == 'Yes':
                     del base[idx]
                     window['publicacoes'].update(
-                        [f"{i}: {post['title']}" for i, post in enumerate(base)]
+                        [f"{i}: {pub['title']}" for i, pub in enumerate(base) if 'title' in pub.keys()]
                     )
 
 def analisar_por_autor(base):
@@ -399,26 +423,29 @@ def analisar_por_autor(base):
         [sg.Text('Autores e Publicações', font=('Helvetica', 16), justification='center', pad=(0, 20))]
     ]
 
-    for autor, publicacoes in autores_ordenados:
+    for autor, publicacoes in autores_ordenados[:20]:
         layout_autores.append([sg.Text(f"{autor} ({len(publicacoes)} publicações):", font=('Helvetica', 14, 'bold'), pad=(0, 10))])
         for pub in publicacoes:
             if 'publish_date' in pub:
                 layout_autores.append([sg.Text(f"  - {pub['title']} ({pub['publish_date']})", font=('Helvetica', 12), pad=(20, 5))])
             else:
-                layout_autores.append([sg.Text(f"  - {pub['title']} (Sem Data)", font=('Helvetica', 12), pad=(20, 5))])
+                if 'title' in pub:
+                    layout_autores.append([sg.Text(f"  - {pub['title']} (Sem Data)", font=('Helvetica', 12), pad=(20, 5))])
 
-    layout_autores.append([sg.Button('Fechar', size=(10, 1), pad=(0, 20))])
+    
 
     layout = [
-        [sg.Column(layout_autores, scrollable=True, vertical_scroll_only=True, size=(600, 400))]
+        [sg.Column(layout_autores, scrollable=True, vertical_scroll_only=True, size=(800, 500))],
+        [sg.Button('Fechar', size=(10, 1), pad=(0, 20))]
     ]
 
-    window = sg.Window('Análise por Autor', layout, modal=True)
-    while True:
+    window = sg.Window('Análise por Autor', layout, modal=True, size=(800, 600), location=(100, 100))
+    run = True
+    while run:
         evento, values = window.read()
         if evento == sg.WINDOW_CLOSED or evento == 'Fechar':
             window.close()
-            return
+            run = False
 
 def analisar_por_palavra_chave(base):
     palavras_chave: dict[str, list[int]] = {}
@@ -439,23 +466,23 @@ def analisar_por_palavra_chave(base):
         [sg.Text('Palavras-chave e Publicações', font=('Helvetica', 16), justification='center', pad=(0, 20))]
     ]
 
-    for palavra, publicacoes in palavras_ordenadas:
+    for palavra, publicacoes in palavras_ordenadas[:20]:
         layout_palavras.append([sg.Text(f"{palavra} ({len(publicacoes)} publicações):", font=('Helvetica', 14, 'bold'), pad=(0, 10))])
         for pub in publicacoes:
             layout_palavras.append([sg.Text(f"  - {pub['title']} ({pub['publish_date']})", font=('Helvetica', 12), pad=(20, 5))])
 
-    layout_palavras.append([sg.Button('Fechar', size=(10, 1), pad=(0, 20))])
-
     layout = [
-        [sg.Column(layout_palavras, scrollable=True, vertical_scroll_only=True, size=(600, 400))]
+        [sg.Column(layout_palavras, scrollable=True, vertical_scroll_only=True, size=(800, 500))],
+        [sg.Button('Fechar', size=(10, 1), pad=(0, 20))]
     ]
 
-    window = sg.Window('Análise por Palavra-chave', layout, modal=True)
-    while True:
+    window = sg.Window('Análise por Palavra-chave', layout, modal=True, size=(800, 600), location=(100, 100))
+    run = True
+    while run:
         evento, values = window.read()
         if evento == sg.WINDOW_CLOSED or evento == 'Fechar':
             window.close()
-            return
+            run = False
 
 # Novas Funções para Estatísticas Avançadas
 def gerar_grafico_publicacoes_por_mes(base):
@@ -556,7 +583,7 @@ def gerar_grafico_publicacoes_por_ano_autor(base):
                         anos[ano] = 1
                     else:
                         anos[ano] += 1
-                anos = dict(sorted(anos.items(),key=lambda tuplo: tuplo[1], reverse=True)[:20])
+                anos = dict(sorted(anos.items(),key=lambda tuplo: tuplo[0])[:20])
                 plt.bar(anos.keys(), anos.values())
                 plt.xlabel('Ano')
                 plt.ylabel('Número de Publicações')
