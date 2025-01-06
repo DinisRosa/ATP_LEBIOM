@@ -186,7 +186,7 @@ def filtro_titulo():
             for pub in dados:
                 if 'title' not in pub.keys():
                     continue
-                if titulo == pub['title'].lower():
+                if titulo in pub['title'].lower():
                     resultados.append(pub)
             if not resultados:
                 sg.popup('Nenhuma publicação encontrada para o título especificado.', font=('Helvetica', 12), title='Resultado da Pesquisa')
@@ -293,16 +293,19 @@ def exportar_dados_parcial(dados_parciais):
 
 def exibir_resultados(resultados):
     layout = [[sg.Text('Resultados da Pesquisa', font=('Helvetica', 16), justification='center')]]
+    layoutRes = []
     for pub in resultados:
-        layout.append([sg.Text('Título:', font=('Helvetica', 12, 'bold')), sg.Text(pub['title'])])
-        layout.append([sg.Text('Resumo:', font=('Helvetica', 12, 'bold')), sg.Text(pub['abstract'])])
-        layout.append([sg.Text('Palavras-chave:', font=('Helvetica', 12, 'bold')), sg.Text(pub['keywords'] if 'keywords' in pub else 'N/A')])
-        layout.append([sg.Text('Autores:', font=('Helvetica', 12, 'bold')), sg.Text(', '.join(autor['name'] for autor in pub['authors']))])
-        layout.append([sg.Text('DOI:', font=('Helvetica', 12, 'bold')), sg.Text(pub['doi'] if 'doi' in pub else 'N/A')])
-        layout.append([sg.Text('Caminho do PDF:', font=('Helvetica', 12, 'bold')), sg.Text(pub['pdf'] if 'pdf' in pub else 'N/A')])
-        layout.append([sg.Text('URL:', font=('Helvetica', 12, 'bold')), sg.Text(pub['url'] if 'url' in pub else 'N/A')])
-        layout.append([sg.Text('Data de publicação:', font=('Helvetica', 12, 'bold')), sg.Text(pub['publish_date'] if 'publish_date' in pub else 'Sem data')])
-        layout.append([sg.Text('-' * 40)])
+        layoutRes.append([sg.Text('Título:', font=('Helvetica', 12, 'bold')), sg.Text(pub['title'])])
+        layoutRes.append([sg.Text('Resumo:', font=('Helvetica', 12, 'bold')), sg.Text(pub['abstract'])])
+        layoutRes.append([sg.Text('Palavras-chave:', font=('Helvetica', 12, 'bold')), sg.Text(pub['keywords'] if 'keywords' in pub else 'N/A')])
+        layoutRes.append([sg.Text('Autores:', font=('Helvetica', 12, 'bold')), sg.Text(', '.join(autor['name'] for autor in pub['authors']))])
+        layoutRes.append([sg.Text('DOI:', font=('Helvetica', 12, 'bold')), sg.Text(pub['doi'] if 'doi' in pub else 'N/A')])
+        layoutRes.append([sg.Text('Caminho do PDF:', font=('Helvetica', 12, 'bold')), sg.Text(pub['pdf'] if 'pdf' in pub else 'N/A')])
+        layoutRes.append([sg.Text('URL:', font=('Helvetica', 12, 'bold')), sg.Text(pub['url'] if 'url' in pub else 'N/A')])
+        layoutRes.append([sg.Text('Data de publicação:', font=('Helvetica', 12, 'bold')), sg.Text(pub['publish_date'] if 'publish_date' in pub else 'Sem data')])
+        layoutRes.append([sg.Text('-' * 40)])
+    layout.append([
+        [sg.Column(layoutRes, scrollable=True, vertical_scroll_only=True, size=(800, 450))]])
     layout.append([sg.Button('Exportar Pesquisa'), sg.Button('Fechar')])
     window = sg.Window('Resultados da Pesquisa', layout, location=(100,100), modal=True, size=(800, 600))
     run = True
