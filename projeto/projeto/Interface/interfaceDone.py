@@ -676,16 +676,6 @@ def mostrar_ajuda():
     ]
     sg.popup("Comandos disponíveis:", *comandos)
 
-def importar_dados():
-    caminho_importacao = sg.popup_get_file('Selecione o arquivo para importar')
-    if caminho_importacao:
-        novos_dados = carregar_dados(path=caminho_importacao)
-        if novos_dados:
-            base.extend(novos_dados)
-            sg.popup('Dados importados com sucesso!')
-
-base = carregar_dados(path=caminho_ficheiro)
-
 # GUI Principal
 def GUI_main(caminho_ficheiro='DataSet_Main.json'):
     sg.theme('DarkAmber')
