@@ -304,7 +304,7 @@ def exibir_resultados(resultados):
         layout.append([sg.Text('Data de publicação:', font=('Helvetica', 12, 'bold')), sg.Text(pub['publish_date'] if 'publish_date' in pub else 'Sem data')])
         layout.append([sg.Text('-' * 40)])
     layout.append([sg.Button('Exportar Pesquisa'), sg.Button('Fechar')])
-    window = sg.Window('Resultados da Pesquisa', layout, location= (100,100), modal=True, size=(800, 600))
+    window = sg.Window('Resultados da Pesquisa', layout, location=(100,100), modal=True, size=(800, 600))
     run = True
     while run:
         evento, values = window.read()

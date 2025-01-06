@@ -35,7 +35,9 @@ def Terminal_Interface():
             doiDict, pdDict, kwDict, autDict = UpdateIndexes(DATA_SET) 
 
         elif op == 2:
-            PrintDataSet(DATA_SET)
+            if DATA_SET != []:
+                PrintDataSet(DATA_SET)
+            else: print('Não tem nenhum dataset carregado!')
 
         elif op == 3:
             Guardar_DataSet('../TRABALHO_FINAL/DataBase_New.json', DATA_SET)
